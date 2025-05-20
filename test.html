@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skyjo Test</title>
+    <link rel="stylesheet" href="dist/skyjo-styles.css">
+</head>
+<body>
+    <h1>Skyjo Test Page</h1>
+    <p>This page directly loads the files from the dist directory.</p>
+    
+    <div id="game-container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-content">
+                <h1>Welcome to Skyjo</h1>
+                <p>Play against two computer opponents and try to get the lowest score!</p>
+                <div class="player-input">
+                    <label for="player-name">Enter your name:</label>
+                    <input type="text" id="player-name" placeholder="Your Name" maxlength="15">
+                </div>
+                <div class="game-settings">
+                    <div class="setting">
+                        <label for="animation-speed">Animation Speed:</label>
+                        <select id="animation-speed">
+                            <option value="slow">Slow</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="fast">Fast</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="max-rounds">Number of Rounds:</label>
+                        <select id="max-rounds">
+                            <option value="1">1 Round</option>
+                            <option value="3" selected>3 Rounds</option>
+                            <option value="5">5 Rounds</option>
+                            <option value="0">Unlimited (first to 100+ points)</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="computer1-difficulty">Computer 1 Difficulty:</label>
+                        <select id="computer1-difficulty">
+                            <option value="casual">Casual</option>
+                            <option value="skilled" selected>Skilled</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="computer2-difficulty">Computer 2 Difficulty:</label>
+                        <select id="computer2-difficulty">
+                            <option value="casual" selected>Casual</option>
+                            <option value="skilled">Skilled</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="start-game-btn" class="btn">Start Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="dist/skyjo-game.js"></script>
+</body>
+</html> 

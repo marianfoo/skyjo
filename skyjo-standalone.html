@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skyjo Game</title>
+    <link rel="stylesheet" href="skyjo-styles.css">
+    <style>
+        #debug-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            opacity: 0.7;
+        }
+        #debug-toggle:hover {
+            opacity: 1;
+        }
+        #debug-panel {
+            position: fixed;
+            bottom: 40px;
+            right: 10px;
+            width: 300px;
+            height: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            font-family: monospace;
+            padding: 10px;
+            overflow-y: auto;
+            z-index: 999;
+            display: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-content">
+                <h1>Welcome to Skyjo</h1>
+                <p>Play against two computer opponents and try to get the lowest score!</p>
+                <div class="player-input">
+                    <label for="player-name">Enter your name:</label>
+                    <input type="text" id="player-name" placeholder="Your Name" maxlength="15">
+                </div>
+                <div class="game-settings">
+                    <div class="setting">
+                        <label for="animation-speed">Animation Speed:</label>
+                        <select id="animation-speed">
+                            <option value="slow">Slow</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="fast">Fast</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="max-rounds">Number of Rounds:</label>
+                        <select id="max-rounds">
+                            <option value="1">1 Round</option>
+                            <option value="3" selected>3 Rounds</option>
+                            <option value="5">5 Rounds</option>
+                            <option value="0">Unlimited (first to 100+ points)</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="computer1-difficulty">Computer 1 Difficulty:</label>
+                        <select id="computer1-difficulty">
+                            <option value="casual">Casual</option>
+                            <option value="skilled" selected>Skilled</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="computer2-difficulty">Computer 2 Difficulty:</label>
+                        <select id="computer2-difficulty">
+                            <option value="casual" selected>Casual</option>
+                            <option value="skilled">Skilled</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="start-game-btn" class="btn">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Current Turn Indicator -->
+        <div id="current-turn-indicator" class="current-turn-indicator hidden">
+            <span id="turn-indicator-text">Current Turn: You</span>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-layout">
+                <!-- Left Side - Info and Scoreboard -->
+                <div class="left-panel">
+                    <!-- Game Info -->
+                    <div class="game-info">
+                        <div class="player-info">
+                            <div id="current-player">Current Player: <span></span></div>
+                            <div id="round-info">Round: <span>1</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Round Scoreboard -->
+                    <div class="round-scoreboard">
+                        <h3>Round Scoreboard</h3>
+                        <table id="round-scoreboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Round</th>
+                                    <th>You</th>
+                                    <th>Computer 1</th>
+                                    <th>Computer 2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Scores will be added here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Computer Players Area (Mini view) -->
+                    <div class="opponents-area">
+                        <div id="computer1" class="opponent">
+                            <h3>Computer 1</h3>
+                            <div class="mini-cards"></div>
+                            <div class="score">Score: <span>0</span></div>
+                            <div class="live-score">Round Score: <span>0</span></div>
+                        </div>
+                        <div id="computer2" class="opponent">
+                            <h3>Computer 2</h3>
+                            <div class="mini-cards"></div>
+                            <div class="score">Score: <span>0</span></div>
+                            <div class="live-score">Round Score: <span>0</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Side - Game Area -->
+                <div class="right-panel">
+                    <!-- Player's Cards -->
+                    <div id="player-area" class="player-area">
+                        <h3 id="player-name-display">You</h3>
+                        <div class="player-cards"></div>
+                        <div class="score">Score: <span>0</span></div>
+                        <div class="live-score">Round Score: <span>0</span></div>
+                    </div>
+
+                    <!-- Card Piles -->
+                    <div class="card-piles">
+                        <div id="draw-pile" class="pile">
+                            <div class="card back">
+                                <div class="card-inner"></div>
+                            </div>
+                            <p>Draw Pile</p>
+                        </div>
+                        <div id="discard-pile" class="pile">
+                            <div class="card empty">
+                                <div class="card-inner"></div>
+                            </div>
+                            <p>Discard Pile</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Round End Screen -->
+        <div id="round-end-screen" class="screen">
+            <div class="round-results">
+                <h2>Round Results</h2>
+                <div class="results-container">
+                    <div class="result-row">
+                        <span class="player-name">You:</span>
+                        <span class="player-score"></span>
+                    </div>
+                    <div class="result-row">
+                        <span class="player-name">Computer 1:</span>
+                        <span class="comp1-score"></span>
+                    </div>
+                    <div class="result-row">
+                        <span class="player-name">Computer 2:</span>
+                        <span class="comp2-score"></span>
+                    </div>
+                </div>
+                <div class="total-scores">
+                    <h3>Total Scores</h3>
+                    <div class="result-row">
+                        <span class="player-name">You:</span>
+                        <span class="player-total"></span>
+                    </div>
+                    <div class="result-row">
+                        <span class="player-name">Computer 1:</span>
+                        <span class="comp1-total"></span>
+                    </div>
+                    <div class="result-row">
+                        <span class="player-name">Computer 2:</span>
+                        <span class="comp2-total"></span>
+                    </div>
+                </div>
+                <!-- Final Cards Display -->
+                <div class="final-cards-display">
+                    <div class="player-final-cards">
+                        <h4>Your Cards</h4>
+                        <div class="final-cards-grid player-final-grid"></div>
+                    </div>
+                    <div class="player-final-cards computer1">
+                        <h4>Computer 1's Cards</h4>
+                        <div class="final-cards-grid computer1-final-grid"></div>
+                    </div>
+                    <div class="player-final-cards computer2">
+                        <h4>Computer 2's Cards</h4>
+                        <div class="final-cards-grid computer2-final-grid"></div>
+                    </div>
+                </div>
+                <button id="next-round-btn" class="btn">Next Round</button>
+            </div>
+        </div>
+
+        <!-- Game End Screen -->
+        <div id="game-end-screen" class="screen">
+            <div class="game-results">
+                <h2>Game Over</h2>
+                <div id="winner-announcement">
+                    <span class="winner-name"></span> wins!
+                </div>
+                <div class="final-scores">
+                    <h3>Final Scores</h3>
+                    <div class="result-row">
+                        <span class="player-name">You:</span>
+                        <span class="player-final"></span>
+                    </div>
+                    <div class="result-row">
+                        <span class="player-name">Computer 1:</span>
+                        <span class="comp1-final"></span>
+                    </div>
+                    <div class="result-row">
+                        <span class="player-name">Computer 2:</span>
+                        <span class="comp2-final"></span>
+                    </div>
+                </div>
+                <button id="new-game-btn" class="btn">New Game</button>
+                <button id="show-leaderboard-btn" class="btn">Show Leaderboard</button>
+            </div>
+        </div>
+
+        <!-- Leaderboard Screen -->
+        <div id="leaderboard-screen" class="screen">
+            <div class="leaderboard-content">
+                <h2>Leaderboard</h2>
+                <div class="leaderboard-table-container">
+                    <table id="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Name</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Leaderboard entries will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+                <button id="back-to-game-btn" class="btn">Back to Game</button>
+            </div>
+        </div>
+
+        <!-- In-game Messages -->
+        <div id="message-container" class="hidden">
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <!-- Card Selection Area (for when a card is drawn) -->
+    <div id="card-selection-area" class="card-selection-area hidden">
+        <div class="card">
+            <div class="card-inner"></div>
+        </div>
+        <div class="card-actions">
+            <button id="keep-card-btn" class="btn">Keep Card</button>
+            <button id="discard-card-btn" class="btn">Discard</button>
+            <button id="cancel-draw-btn" class="btn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Computer Card Animation Element -->
+    <div id="computer-card-animation" class="hidden">
+        <div class="card">
+            <div class="card-inner"></div>
+        </div>
+    </div>
+
+    <!-- Debug Tools -->
+    <button id="debug-toggle">Debug</button>
+    <div id="debug-panel"></div>
+
+    <script src="skyjo-game.js"></script>
+    <script>
+        // Debug panel functionality
+        document.getElementById('debug-toggle').addEventListener('click', function() {
+            const panel = document.getElementById('debug-panel');
+            if (panel.style.display === 'none' || !panel.style.display) {
+                panel.style.display = 'block';
+                // Override the debugLog function to also show in panel
+                window.originalDebugLog = window.debugLog;
+                window.debugLog = function(message, obj) {
+                    // Call the original function first
+                    window.originalDebugLog(message, obj);
+                    
+                    // Add to debug panel
+                    const entry = document.createElement('div');
+                    entry.textContent = message;
+                    panel.appendChild(entry);
+                    panel.scrollTop = panel.scrollHeight;
+                    
+                    // Keep only the last 50 messages
+                    while (panel.childElementCount > 50) {
+                        panel.removeChild(panel.firstChild);
+                    }
+                };
+            } else {
+                panel.style.display = 'none';
+                // Restore original debugLog if it exists
+                if (window.originalDebugLog) {
+                    window.debugLog = window.originalDebugLog;
+                }
+            }
+        });
+        
+        // Force show console on mobile
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            console = new Object();
+            console.log = function(message) {
+                var panel = document.getElementById('debug-panel');
+                var entry = document.createElement('div');
+                entry.textContent = message;
+                panel.appendChild(entry);
+                panel.scrollTop = panel.scrollHeight;
+            };
+            console.error = console.warn = console.info = console.log;
+            document.getElementById('debug-panel').style.display = 'block';
+        }
+    </script>
+</body>
+</html> 
